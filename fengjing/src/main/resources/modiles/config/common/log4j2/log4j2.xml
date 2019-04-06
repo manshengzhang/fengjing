@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    status : 这个用于设置log4j2自身内部的信息输出,可以不设置,当设置成trace时,会看到log4j2内部各种详细输出
+    monitorInterval : Log4j能够自动检测修改配置文件和重新配置本身, 设置间隔秒数。
+    monitorInterval="3600" 指log4j2每隔3600秒（1小时），自动监控该配置文件是否有变化，如果变化，则自动根据文件内容重新配置 
+              注：本配置文件的目标是将不同级别的日志输出到不同文件，最大50MB一个文件，
+              文件数据达到最大值时，旧数据会被压缩并放进指定文件夹
+              日志格式介绍参考	 https://blog.csdn.net/Q176782/article/details/78288734
+              日志配置参考		 https://www.2cto.com/kf/201612/577478.html
+              		 https://blog.csdn.net/fz13768884254/article/details/81214773
+              日志框架介绍		 https://blog.csdn.net/kxcfzyk/article/details/38613861
+-->
+<configuration monitorinterval="3600" status="WARN">
+	<properties>
+        <!-- （*必须,各应用需要修改） 部署应用的名称,命名规则 :全部小写字母、中短横线、数字,与微服务命名,disconf中命名一致 -->
+        <property name="APPNAME">fengjing</property>
+        <!-- （各应用需要修改）部署应用的端口号，用于一台服务器部署多台应用的情况,如果不需要，保持默认 -->
+        <property name="PORT">${sys:crtServerPort:-8064}</property>
+        <!-- （各应用需要修改）日志文件本地存放目录路径 建议各个环境跟生产环境统一起来,方便维护 -->
+        <property name="logBaseFolder">D:/app_logs/fengjing/logs</property>
+ 		<!-- 配置日志文件输出目录，此配置将日志输出到tomcat根目录下的指定文件夹 -->
+        <!-- <property name="LOG_HOME">${sys:catalina.home}/log4j2_logs</property> -->
+        <!-- 日志文件名称的前缀部分，以下为建议值 -->
+        <property name="logFileNamePrefix">${APPNAME}</property>
+        <!-- 日志文件最小切割单位 值不做强制要求，建议300MB -->
+        <property name="every_file_size">50MB</property>
+        <!-- *必须并强制遵守 日志文件的编码 -->
+        <property name="log_charset">UTF-8</property>
+        <!-- *必须并强制遵守 日志格式说明 -->
+        <property name="log_pattern">
+        	[%d{yyyy-MM-dd HH:mm:ss.SSS}]<!-- |日志时间| -->[${PORT}]<!-- 端口号 -->[%t]<!-- 线程名 -->[%p]<!-- 日志级别 -->[${APPNAME}.%logger%M]<!-- 应用名称|类名|方法名 -->[%X{MDCCRT_INPUT_PARAM}]<!-- 输入参数 -->[%X{MDCCRT_OUTPUT_PARAM}]<!-- 输出参数 -->[%X{MDCCRT_COST_TIME}]<!-- 耗时 -->[%m]%n<!-- 具体打印的msg内容然后换行 -->
+        </property>
+    </properties>
+ 	<appenders>
+        <!--这个输出控制台的配置，这里输出除了warn和error级别的信息到System.out-->
+        <console name="console_out_appender" target="SYSTEM_OUT">
+            <!-- 
+            	onMatch="ACCEPT"匹配该级别及以上级别;        onMatch="DENY"不匹配该级别及以上级别;
+				onMismatch="ACCEPT" 表示匹配该级别以下的级别; onMismatch="DENY" 表示不匹配该级别以下的级别;
+			-->
+			<!-- 控制台只输出低于warn级别的信息将这些信息输出到控制台 便于开发 -->
+            <thresholdfilter level="warn" onmatch="DENY" onmismatch="ACCEPT">
+	            <patternlayout pattern="${log_pattern}"/><!-- 输出日志的格式 -->
+        	</thresholdfilter>
+        </console>
+        <!--这个输出控制台的配置，这里输出warn和error级别的信息到System.err，在eclipse控制台上看到的是红色文字-->
+        <console name="console_err_appender" target="SYSTEM_ERR">
+            <!-- 控制台只输出warn及以上级别的信息 -->
+            <thresholdfilter level="warn" onmatch="ACCEPT" onmismatch="DENY">
+	            <patternlayout pattern="${log_pattern}"/><!-- 输出日志的格式 -->
+        	</thresholdfilter>
+        </console>
+ 
+ 		<!-- all File Config 如果日志分类保存 这个日志没有必要--><!-- immediateflush=true:表示所有消息都会被立即输出,设为false则不输出 -->
+        <rollingrandomaccessfile filename="${logBaseFolder}/${logFileNamePrefix}-all.log" filepattern="${logBaseFolder}/%d{yyyy-MM-dd}/${logFileNamePrefix}-all-%d{yyyyMMdd-HH}.%i.log.gz" immediateflush="true" name="all_appender">
+            <patternlayout charset="${log_charset}" pattern="${log_pattern}"/>
+            <policies><!-- 以下是日志压缩包目录的建议格式名称 建议1天归档依次，压缩文件上线建议为200,这里预估每个磁盘存储空间200G左右，每个压缩包最大值200MB -->
+            	<!-- interval属性用来指定多久滚动一次，默认是1 hour modulate=true用来调整时间 比如现在是早上3am，interval是4，那么第一次滚动是在4am，接着是8am，12am...而不是7am. -->
+                <timebasedtriggeringpolicy interval="1" modulate="true">
+                	<sizebasedtriggeringpolicy size="${every_file_size}"></sizebasedtriggeringpolicy>
+            	</timebasedtriggeringpolicy>
+            </policies>
+           	<defaultrolloverstrategy max="150"><!-- 用来指定同一个文件夹下最多有几个日志文件时开始删除最旧的，创建新的(通过max属性),默认是7个文件 -->
+	            <filters>
+	                <thresholdfilter level="ALL" onmatch="ACCEPT" onmismatch="DENY"></thresholdfilter><!-- 显示所有信息 -->
+	            </filters>
+	            <Delete basePath="${logBaseFolder}" maxDepth="1"><!-- 这个配置在all里 其它里面影响 日志输出内容 -->
+                     <IfFileName glob="${logFileNamePrefix}-*.log" /><!-- 这里是删除所有 -->
+                     <IfLastModified age="15d" /><!-- 最多备份15天以内的日志  -->
+	            </Delete>
+       		</defaultrolloverstrategy>
+        </rollingrandomaccessfile>
+        
+        <!-- TRACE级别日志 -->
+        <!-- 设置日志格式并配置日志压缩格式，压缩文件独立放在一个文件夹内，
+        	日期格式不能为冒号，否则无法生成，因为文件名不允许有冒号，此appender只输出trace级别的数据到trace.log -->
+        <rollingrandomaccessfile filename="${logBaseFolder}/${logFileNamePrefix}-trace.log" filepattern="${logBaseFolder}/%d{yyyy-MM-dd}/${logFileNamePrefix}-trace-%d{yyyyMMdd-HH}.%i.log.gz" immediateflush="true" name="trace_appender">
+            <patternlayout charset="${log_charset}" pattern="${log_pattern}"/>
+            <policies>
+            	<!-- interval属性用来指定多久滚动一次，默认是1 hour modulate=true用来调整时间 比如现在是早上3am，interval是4，那么第一次滚动是在4am，接着是8am，12am...而不是7am.-->
+                <timebasedtriggeringpolicy interval="1" modulate="true">
+                	<sizebasedtriggeringpolicy size="${every_file_size}"></sizebasedtriggeringpolicy>
+            	</timebasedtriggeringpolicy>
+            </policies>
+            <filters>
+                <!-- DENY，日志将立即被抛弃不再经过其他过滤器； NEUTRAL，有序列表里的下个过滤器接着处理日志； ACCEPT，日志会被立即处理，不再经过剩余过滤器。 -->
+                <thresholdfilter level="debug" onmatch="DENY" onmismatch="NEUTRAL"/>
+                <thresholdfilter level="trace" onmatch="ACCEPT" onmismatch="DENY"/><!-- 只输出trace级别的数据  -->
+            </filters>
+        </rollingrandomaccessfile>
+        
+        <!-- DEBUG级别日志 -->
+        <rollingrandomaccessfile filename="${logBaseFolder}/${logFileNamePrefix}-debug.log" filepattern="${logBaseFolder}/%d{yyyy-MM-dd}/${logFileNamePrefix}-debug-%d{yyyyMMdd-HH}.%i.log.gz" immediateflush="true" name="debug_appender">
+            <patternlayout charset="${log_charset}" pattern="${log_pattern}"/>
+            <policies>
+            	<!-- interval属性用来指定多久滚动一次，默认是1 hour modulate=true用来调整时间 比如现在是早上3am，interval是4，那么第一次滚动是在4am，接着是8am，12am...而不是7am.-->
+                <timebasedtriggeringpolicy interval="1" modulate="true">
+                	<sizebasedtriggeringpolicy size="${every_file_size}"></sizebasedtriggeringpolicy>
+            	</timebasedtriggeringpolicy>
+            </policies>
+            <filters>
+                <!-- DENY，日志将立即被抛弃不再经过其他过滤器； NEUTRAL，有序列表里的下个过滤器接着处理日志； ACCEPT，日志会被立即处理，不再经过剩余过滤器。 -->
+                <thresholdfilter level="info" onmatch="DENY" onmismatch="NEUTRAL"/>
+                <thresholdfilter level="debug" onmatch="ACCEPT" onmismatch="DENY"/><!-- 只输出debug级别的数据  -->
+            </filters>
+        </rollingrandomaccessfile>
+ 
+        <!-- INFO级别日志 -->
+        <rollingrandomaccessfile filename="${logBaseFolder}/${logFileNamePrefix}-info.log" filepattern="${logBaseFolder}/%d{yyyy-MM-dd}/${logFileNamePrefix}-info-%d{yyyyMMdd-HH}.%i.log.gz" immediateflush="true" name="info_appender">
+            <patternlayout charset="${log_charset}" pattern="${log_pattern}"/>
+            <policies>
+            	<!-- interval属性用来指定多久滚动一次，默认是1 hour modulate=true用来调整时间 比如现在是早上3am，interval是4，那么第一次滚动是在4am，接着是8am，12am...而不是7am.-->
+                <timebasedtriggeringpolicy interval="1" modulate="true">
+                	<sizebasedtriggeringpolicy size="${every_file_size}"></sizebasedtriggeringpolicy>
+            	</timebasedtriggeringpolicy>
+            </policies>
+            <filters>
+            	<thresholdfilter level="warn" onmatch="DENY" onmismatch="NEUTRAL"/>
+            	<thresholdfilter level="info" onmatch="ACCEPT" onmismatch="DENY"/><!-- 只输出info级别的数据  -->
+            </filters>
+        </rollingrandomaccessfile>
+ 
+        <!-- WARN级别日志 -->
+        <rollingrandomaccessfile filename="${logBaseFolder}/${logFileNamePrefix}-warn.log" filepattern="${logBaseFolder}/%d{yyyy-MM-dd}/${logFileNamePrefix}-warn-%d{yyyyMMdd-HH}.%i.log.gz" immediateflush="true" name="warn_appender">
+            <patternlayout charset="${log_charset}" pattern="${log_pattern}"/>
+            <policies>
+            	<!-- interval属性用来指定多久滚动一次，默认是1 hour modulate=true用来调整时间 比如现在是早上3am，interval是4，那么第一次滚动是在4am，接着是8am，12am...而不是7am.-->
+                <timebasedtriggeringpolicy interval="1" modulate="true">
+                	<sizebasedtriggeringpolicy size="${every_file_size}"></sizebasedtriggeringpolicy>
+            	</timebasedtriggeringpolicy>
+            </policies>
+            <filters>
+                <thresholdfilter level="error" onmatch="DENY" onmismatch="NEUTRAL"/>
+                <thresholdfilter level="warn" onmatch="ACCEPT" onmismatch="DENY"/><!-- 只输出warn级别的数据  -->
+              </filters>
+        </rollingrandomaccessfile>
+        
+        <!-- ERROR级别日志 -->
+        <rollingrandomaccessfile filename="${logBaseFolder}/${logFileNamePrefix}-error.log" filepattern="${logBaseFolder}/%d{yyyy-MM-dd}/${logFileNamePrefix}-error-%d{yyyyMMdd-HH}.%i.log.gz" immediateflush="true" name="error_appender">
+            <patternlayout charset="${log_charset}" pattern="${log_pattern}"/>
+            <policies>
+                <timebasedtriggeringpolicy interval="1" modulate="true">
+                	<sizebasedtriggeringpolicy size="${every_file_size}"></sizebasedtriggeringpolicy>
+            	</timebasedtriggeringpolicy>
+            </policies>
+            <filters>
+                <!-- 只显示error信息 -->
+                <thresholdfilter level="fatal" onmatch="DENY" onmismatch="NEUTRAL"/>
+                <thresholdfilter level="error" onmatch="ACCEPT" onmismatch="DENY"/>
+            </filters>
+        </rollingrandomaccessfile>
+        
+        <!-- FATAL级别日志 -->
+        <rollingrandomaccessfile filename="${logBaseFolder}/${logFileNamePrefix}-fatal.log" filepattern="${logBaseFolder}/%d{yyyy-MM-dd}/${logFileNamePrefix}-fatal-%d{yyyyMMdd-HH}.%i.log.gz" immediateflush="true" name="fatal_appender">
+            <patternlayout charset="${log_charset}" pattern="${log_pattern}"/>
+            <policies>
+                <timebasedtriggeringpolicy interval="1" modulate="true">
+                	<sizebasedtriggeringpolicy size="${every_file_size}"></sizebasedtriggeringpolicy>
+            	</timebasedtriggeringpolicy>
+            </policies>
+            <filters>
+                <thresholdfilter level="off" onmatch="DENY" onmismatch="NEUTRAL"/>
+	            <thresholdfilter level="fatal" onmatch="ACCEPT" onmismatch="DENY"/><!-- 只显示fatal信息 -->
+            </filters>
+        </rollingrandomaccessfile>
+    </appenders>
+    <loggers>
+    	<!--过滤掉spring和mybatis的一些无用的DEBUG信息-->
+        <logger name="org.mybatis" level="INFO"></logger>
+        <logger name="org.springframework.core" level="info"></logger>
+        <logger name="org.springframework.beans" level="info"></logger>
+        <logger name="org.springframework.context" level="info"></logger>
+        <logger name="org.springframework.web" level="info"></logger>
+        <!--然后定义logger，只有定义了logger并引入的appender，appender才会生效-->
+        <root level="trace">
+            <appender-ref ref="console_out_appender"/>
+            <appender-ref ref="console_err_appender"/>
+            <appender-ref ref="all_appender"/>
+            <appender-ref ref="trace_appender"/>
+            <appender-ref ref="debug_appender"/>
+            <appender-ref ref="info_appender"/>
+            <appender-ref ref="warn_appender"/>
+            <appender-ref ref="error_appender"/>
+            <appender-ref ref="fatal_appender"/>
+        </root>
+
+        <!-- 第三方日志系统 -->
+        <logger name="org.springframework.core" level="info"/>
+        <logger name="org.springframework.beans" level="info"/>
+        <logger name="org.springframework.context" level="info"/>
+        <logger name="org.springframework.web" level="info"/>
+        <logger name="org.jboss.netty" level="warn"/>
+        <logger name="org.apache.http" level="warn"/>
+    </loggers>
+</configuration>

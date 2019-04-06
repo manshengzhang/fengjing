@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx" 
+       xmlns:aop="http://www.springframework.org/schema/aop" 
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                           http://www.springframework.org/schema/beans/spring-beans.xsd 
+                           http://www.springframework.org/schema/context 
+                           http://www.springframework.org/schema/context/spring-context.xsd 
+                           http://www.springframework.org/schema/tx 
+                           http://www.springframework.org/schema/tx/spring-tx.xsd 
+                           http://www.springframework.org/schema/aop 
+                           http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!-- 
+    	https://www.programcreek.com/java-api-examples/?code=youseries/ureport/ureport-master/ureport2-console/src/main/java/com/bstek/ureport/console/designer/DatasourceServletAction.java#
+    -->
+    <context:property-placeholder location="classpath:modiles/config/common/ureport.properties" ignore-unresolvable="true" order="1"/>
+    
+	<import resource="classpath:ureport-console-context.xml" />
+    
+	<!-- 自定义 报表存储器 -->
+	<bean id="fileReportProvider" class="modules.common.ureport.FileReportProvider">
+		<!-- ureport bean config the file save path -->
+		<property name="fileStoreDir" value="${ureport.fileStoreDir}"/>
+		<!-- 期望存储空间60G 0表示忽略空间判断 60*1024*1024*1024-->
+		<property name="diskSpace" value="64424509440"/>
+		<property name="disabled" value="false"/>
+	</bean>
+	
+	<!-- ureport 业务数据源 -->
+    <import resource="classpath:modiles/config/business/business-context.xml" />
+</beans>

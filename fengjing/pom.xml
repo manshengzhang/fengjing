@@ -1,0 +1,336 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <!-- 
+  	项目搭建参照
+  	https://liguanshi.iteye.com/blog/2413023
+  	SpringMVC+Spring+mybatis+maven+tomcat+restful
+  	
+  	https://blog.csdn.net/bigname22/article/details/79380238
+  	
+  	https://www.cnblogs.com/zou90512/p/4044818.html
+  	
+  	http://wiki.bsdn.org/display/UR/ureport2+Home
+  	
+  	https://blog.csdn.net/m0_38054145/article/details/82054524
+   -->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>fengjing</groupId>
+  <artifactId>fengjing</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>war</packaging>
+  <name>fengjing</name>
+  <url>http://maven.apache.org</url>
+  <build>
+  	<!-- 数据集的名字 fengjing-->
+    <finalName>fengjing</finalName>
+    <plugins>
+      <!--mybatis 逆向工程插件-->
+      <plugin>
+        <groupId>org.mybatis.generator</groupId>
+        <artifactId>mybatis-generator-maven-plugin</artifactId>
+        <version>1.3.2</version>
+        <configuration>
+          <verbose>true</verbose>
+          <overwrite>true</overwrite>
+        </configuration>
+      </plugin>
+      <plugin>
+             <groupId>org.eclipse.jetty</groupId>
+             <artifactId>jetty-maven-plugin</artifactId>
+             <version>9.2.8.v20150217</version>
+             <configuration>
+                 <httpConnector>
+                     <port>80</port>
+                 </httpConnector>
+                 <stopKey>shutdown</stopKey>
+                 <stopPort>9966</stopPort>
+             </configuration>
+         </plugin>
+    </plugins>
+
+  </build>
+  
+  <properties>
+  	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding><!-- 解决使用开发工具默认编码问题 -->
+    <spring.version>4.1.1.RELEASE</spring.version><!-- spring版本 -->
+    <mysql.version>5.1.6</mysql.version><!-- mysql版本 -->
+    <!-- log4j日志文件管理包版本 -->  
+    <log4j2.version>2.9.1</log4j2.version>
+    <!--不能升级为1.8.*,log4j2的2.9.1版本依赖1.7.25,使用1.8提示No SLF4J providers were found-->
+    <slf4j.version>1.7.25</slf4j.version>
+    <jdk.version>8.0</jdk.version>
+    <ureport.version>2.2.8</ureport.version><!-- ureport 版本 -->
+  </properties>
+  <repositories>
+  	<repository>
+   	  <id>sonatype</id>
+   	  <url>https://oss.sonatype.org/content/groups/public/</url>
+    </repository>
+  </repositories>
+  <dependencies>
+  <!-- 导入java ee jar 包 -->  
+    <dependency> 
+        <groupId>javax</groupId>
+        <artifactId>javaee-api</artifactId>
+        <version>${jdk.version}</version>
+    </dependency>
+    <!-- springframe start -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-oxm</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-aspects</artifactId>
+        <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-tx</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jdbc</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aop</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context-support</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${spring.version}</version>
+        <type>pom</type>
+        <scope>compile</scope>
+    </dependency>
+    <!-- springframe end -->
+    <!--aspectj start-->
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>1.8.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+      <version>1.8.6</version>
+    </dependency>
+    <!--aspectj end-->
+    <!--c3p0-->
+    <dependency>
+      <groupId>com.mchange</groupId>
+      <artifactId>c3p0</artifactId>
+      <version>0.9.5.1</version>
+    </dependency>
+    <!--servlet/jsp api start-->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <!--servlet/jsp api end-->
+    <!--junit4-->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <!-- 表示开发的时候引入，发布的时候不会加载此包 -->
+      <scope>test</scope>
+    </dependency>
+    <!--mybatis-->
+    <dependency>
+      <groupId>org.mybatis</groupId>
+      <artifactId>mybatis</artifactId>
+      <version>3.3.0</version>
+    </dependency>
+    <!--mybatis spring整合-->
+    <dependency>
+      <groupId>org.mybatis</groupId>
+      <artifactId>mybatis-spring</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+	<dependency>
+      <groupId>mysql</groupId>
+	  <artifactId>mysql-connector-java</artifactId>
+	  <version>${mysql.version}</version>
+	</dependency>
+    
+    <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.2.1</version>
+    </dependency>
+    <!--jstl-->
+    <dependency>
+      <groupId>jstl</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.2</version>
+    </dependency>
+    
+    <!-- 日志文件管理包 --> 
+    <!-- log start -->  
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>${log4j2.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+        <version>${log4j2.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-web</artifactId>
+        <version>${log4j2.version}</version>
+    </dependency>
+	<!--log4j2 异步依赖-->
+	<dependency>
+	    <groupId>com.lmax</groupId>
+	    <artifactId>disruptor</artifactId>
+	    <version>3.3.6</version>
+	</dependency>
+    <!-- 格式化对象，方便输出日志 --> 
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.7.4</version>
+    </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.7.4</version>
+    </dependency>
+    <dependency>  
+        <groupId>com.alibaba</groupId>  
+        <artifactId>fastjson</artifactId>  
+        <version>1.1.41</version>  
+    </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.7.4</version>
+    </dependency>
+    
+    <!-- slf4j -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>jcl-over-slf4j</artifactId>
+	    <version>${slf4j.version}</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>jul-to-slf4j</artifactId>
+	    <version>${slf4j.version}</version>
+	</dependency>
+	<!--桥接器:告诉slf4j使用Log4j2-->
+	<dependency>
+	    <groupId>org.apache.logging.log4j</groupId>
+	    <artifactId>log4j-slf4j-impl</artifactId>
+	    <version>${log4j2.version}</version>
+	    <exclusions>
+	        <exclusion>
+	            <artifactId>slf4j-api</artifactId>
+	            <groupId>org.slf4j</groupId>
+	        </exclusion>
+	    </exclusions>
+	</dependency>
+    <!-- 映入JSON -->  
+    <dependency>  
+        <groupId>org.codehaus.jackson</groupId>  
+        <artifactId>jackson-mapper-asl</artifactId>  
+        <version>1.9.13</version>  
+    </dependency>
+    <!-- 上传组件包 -->  
+    <dependency>  
+        <groupId>commons-fileupload</groupId>  
+        <artifactId>commons-fileupload</artifactId>  
+        <version>1.3.1</version>  
+    </dependency>  
+    <dependency>  
+        <groupId>commons-io</groupId>  
+        <artifactId>commons-io</artifactId>  
+        <version>2.4</version>  
+    </dependency> 
+    <dependency>
+		<groupId>commons-lang</groupId>
+		<artifactId>commons-lang</artifactId>
+		<version>2.4</version>
+	</dependency> 
+    <dependency>  
+        <groupId>commons-codec</groupId>  
+        <artifactId>commons-codec</artifactId>  
+        <version>1.9</version>  
+    </dependency>
+	<!-- ureport jar 引用  就引用这一个就行 需要运行在 jdk1.8的版本上-->
+    <dependency>
+      <groupId>com.bstek.ureport</groupId>
+      <artifactId>ureport2-console</artifactId>
+      <version>${ureport.version}</version>
+    </dependency>
+    
+    <!-- redis -->
+    <dependency>
+        <groupId>org.springframework.data</groupId>
+        <artifactId>spring-data-redis</artifactId>
+        <version>1.3.0.RELEASE</version>
+    </dependency>
+    <dependency>
+        <groupId>redis.clients</groupId>
+        <artifactId>jedis</artifactId>
+        <version>2.6.2</version>
+    </dependency>
+  </dependencies>
+</project>

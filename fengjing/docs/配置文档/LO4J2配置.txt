@@ -1,0 +1,9 @@
+https://blog.csdn.net/u011389474/article/details/70054256
+https://blog.csdn.net/z69183787/article/details/51892368
+https://www.cnblogs.com/dustcode/p/9919214.html
+https://www.cnblogs.com/SummerinShire/p/6498977.html
+以上是 log4j2配置参考
+还可以参考项目中log4j2的配置文件
+fengjing/src/main/resources/modiles/config/common/log4j2/log4j2.xml
+比较完整的配置文件
+

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="modules.login.dao.LoginDao">
+
+	<sql id="all_fields">
+		a.id              as id,
+		a.uname           as uname,
+	    a.upass_salt      as upassSalt,
+	    a.remark          as remark,
+	    a.host            as host,
+	    a.create_time     as createTime,
+	    a.login_time      as loginTime,
+	    a.flag            as flag,
+	    a.login_equipment as loginEquipment
+	</sql>
+    <!-- 查询所有用户信息 暂时不用-->
+    <select id="getAllAccount" resultType="modules.login.pojo.Account">
+        select
+            <include refid="all_fields"/>
+        from
+            login_account a
+    </select>
+
+    <!-- 依据用户登录名称查询用户登录信息 -->
+    <!-- <select id="selectUserByUserName" parameterType="string" resultType="com.cn.entity.User">
+        select
+            * 
+        from
+            center_login
+        where
+            c_username = #{c_username}
+    </select> -->
+
+</mapper>
