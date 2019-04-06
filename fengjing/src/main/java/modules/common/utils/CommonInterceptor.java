@@ -24,13 +24,16 @@ public class CommonInterceptor extends HandlerInterceptorAdapter {
      * 这里将项目名/fengjing/的请求指定到/login/home这个Controller的请求上
      * 不继续原来的请求 则返回false，继续原来的请求返回true
 	 */
+	@Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String host = request.getRemoteHost();
         String url = request.getRequestURI();
+        String strName = "/fengjing/";
         System.out.println("IP为---->>> " + host + " <<<-----访问了1系统" + "url=" + url);
-        if("/fengjing/".equals(url)){
+        if(strName.equals(url)){
         	request.getRequestDispatcher("/login/home").forward(request, response);
-        	return false;//不继续原来的请求
+        	//不继续原来的请求
+        	return false;
         }
         //拦截到请求动作  然后继续其他请求 返回true
         return true;

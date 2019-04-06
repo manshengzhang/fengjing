@@ -30,10 +30,11 @@ public class LoginController{
 	@RequestMapping(value="/home",method=RequestMethod.GET)
 	public ModelAndView toLogin(@Valid Account account, BindingResult result, Model model) throws Exception {
         logger.info("toLogin in LoginController --> toLogin");
-        Account all_Account = loginService.getAllAccount();
+        Account allAccount = loginService.getAllAccount();
 		model.addAttribute("account", "eeeee");
-		System.out.println(all_Account);
-        return new ModelAndView("ureport/ureport_home","account",account);//跳转到视图
+		System.out.println(allAccount);
+		//跳转到视图
+        return new ModelAndView("ureport/ureport_home","account",account);
     }
 	
     public String indexPage(){

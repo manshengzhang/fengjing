@@ -32,11 +32,14 @@ import com.bstek.ureport.provider.report.ReportProvider;
  *
  */
 public class FileReportProvider implements ReportProvider,ApplicationContextAware{
-	
-	private String prefix="file:";//文件前缀
-    private String fileStoreDir;//文件存储路径
-    private long diskSpace;//期望存储报表的盘符空间剩余大小
-    private boolean disabled;//是否禁用
+	/**文件前缀*/
+	private String prefix="file:";
+	/**文件存储路径*/
+    private String fileStoreDir;
+    /**期望存储报表的盘符空间剩余大小*/
+    private long diskSpace;
+    /**是否禁用*/
+    private boolean disabled;
     
     /**
      * 根据报表名加载报表文件
@@ -140,14 +143,15 @@ public class FileReportProvider implements ReportProvider,ApplicationContextAwar
      
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    	
-    	if("".equals(fileStoreDir) || fileStoreDir == null)//没有指定 保存路径
+    	//没有指定 保存路径
+    	if("".equals(fileStoreDir) || fileStoreDir == null){
     		return;
+    	}
     	//判断系统服务器是否存在该盘符和盘符剩余空间大小是否足够
     	if(diskSpace > new GetDriverMessage().oneDriverFreeSpace(fileStoreDir.substring(0,1))){
     		System.err.println(fileStoreDir.substring(0,1)+"盘 剩余空间:"+ 
-    	                       new GetDriverMessage().FormetFileSize(new GetDriverMessage().oneDriverFreeSpace(fileStoreDir.substring(0,1)))+
-    	                       " 小于期望空间:" + new GetDriverMessage().FormetFileSize(diskSpace)+
+    	                       new GetDriverMessage().formetfilesize(new GetDriverMessage().oneDriverFreeSpace(fileStoreDir.substring(0,1)))+
+    	                       " 小于期望空间:" + new GetDriverMessage().formetfilesize(diskSpace)+
     	                       " 请计划备份报表模板！");
     	}
     	
@@ -189,7 +193,10 @@ public class FileReportProvider implements ReportProvider,ApplicationContextAwar
 		return diskSpace;
 	}
 	
-	//spring 传进来的是 string数字
+	/**
+	 * spring 传进来的是 string数字
+	 * @param diskSpace
+	 */
 	public void setDiskSpace(String diskSpace) {
 		this.diskSpace = Long.valueOf(diskSpace).longValue();
 	}

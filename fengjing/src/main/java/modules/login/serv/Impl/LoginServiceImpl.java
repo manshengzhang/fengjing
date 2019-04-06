@@ -1,4 +1,4 @@
-package modules.login.serv.Impl;
+﻿package modules.login.serv.impl;
 
 import javax.annotation.Resource;
 
@@ -19,6 +19,7 @@ public class LoginServiceImpl implements LoginService{
 	
 	/**
 	 * 获取系统所有账号
+	 * @author Administrator
 	 * @return
 	 */
 	@Override	
